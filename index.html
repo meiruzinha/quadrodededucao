@@ -1247,7 +1247,7 @@ select:focus{
 }
 
 .install-action{
-  display:none;
+  display:block;
   flex-basis:100%;
 }
 .install-action.available{display:block}
@@ -2964,11 +2964,27 @@ window.addEventListener("beforeinstallprompt",event=>{
 });
 
 els.installApp?.addEventListener("click",async()=>{
-  if(!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt=null;
-  els.installApp.classList.remove("available");
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    return;
+  }
+
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  const isAndroid=/android/i.test(navigator.userAgent);
+
+  if(isIOS){
+    alert("Para instalar no iPhone/iPad: toque no botão Compartilhar do navegador e escolha ‘Adicionar à Tela de Início’. Depois confirme em ‘Adicionar’. ");
+    return;
+  }
+
+  if(isAndroid){
+    alert("Se a janela de instalação não apareceu, abra o menu ⋮ do navegador e escolha ‘Instalar app’ ou ‘Adicionar à tela inicial’. Se acabou de abrir o site pela primeira vez, atualize a página uma vez e tente novamente.");
+    return;
+  }
+
+  alert("Abra o menu do navegador e procure por ‘Instalar app’, ‘Adicionar à tela inicial’ ou opção equivalente.");
 });
 
 window.addEventListener("appinstalled",()=>{

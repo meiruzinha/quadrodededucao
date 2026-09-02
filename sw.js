@@ -1,4 +1,4 @@
-const CACHE_NAME = "quadro-deducao-v71";
+const CACHE_NAME = "quadro-deducao-v72";
 const APP_ASSETS = [
   "./",
   "./index.html",

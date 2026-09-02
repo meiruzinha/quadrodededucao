@@ -1,0 +1,239 @@
+/* ===== V70 — IMPRESSÃO A4 DO CASO ===== */
+.print-action{
+  flex-basis:100%;
+}
+
+.print-sheet{
+  display:none;
+}
+
+@media print{
+  @page{
+    size:A4 portrait;
+    margin:9mm;
+  }
+
+  html,body{
+    margin:0 !important;
+    padding:0 !important;
+    background:#fff !important;
+  }
+
+  body{
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .page,
+  .site-footer{
+    display:none !important;
+  }
+
+  .print-sheet{
+    --small-cell:72px;
+    --small-side:108px;
+    --small-head:84px;
+    --small-title-row:38px;
+    --small-name-row:46px;
+
+    --big-cell:68px;
+    --big-side:100px;
+    --big-head:82px;
+    --big-title-row:37px;
+    --big-name-row:45px;
+
+    display:flex !important;
+    width:192mm;
+    min-height:279mm;
+    margin:0 auto;
+    flex-direction:column;
+    box-sizing:border-box;
+    color:#27303b;
+    background:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+  }
+
+  .print-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8mm;
+    padding:0 0 4mm;
+    border-bottom:1px solid #d9dee5;
+  }
+
+  .print-kicker{
+    margin:0 0 1.5mm;
+    color:#7a8491;
+    font-size:8.5pt;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.7pt;
+  }
+
+  .print-header h1{
+    margin:0;
+    color:#2f3742;
+    font-size:17pt;
+    line-height:1.1;
+  }
+
+  .print-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.5mm 3mm;
+    margin-top:2.2mm;
+    color:#606b78;
+    font-size:8.5pt;
+    font-weight:700;
+  }
+
+  .print-meta span + span::before{
+    content:"•";
+    margin-right:3mm;
+    color:#a4acb6;
+  }
+
+  .print-difficulty{
+    flex:0 0 auto;
+    padding:2mm 3mm;
+    border:1px solid #dfe4ea;
+    border-radius:999px;
+    background:#f6f7f9;
+    color:#515b68;
+    font-size:8.5pt;
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .print-board-area{
+    flex:0 0 auto;
+    width:100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    margin-top:5mm;
+    overflow:visible;
+  }
+
+  .print-board-area.small-print{
+    min-height:139mm;
+  }
+
+  .print-board-area.big-print{
+    min-height:174mm;
+  }
+
+  .print-board-area .small-board{
+    zoom:1;
+    margin:0 auto;
+  }
+
+  .print-board-area .big-wrap{
+    zoom:.72;
+    margin:0 auto;
+  }
+
+  .print-board-area .cell{
+    cursor:default;
+  }
+
+  .print-board-area .cell:focus{
+    outline:none !important;
+  }
+
+  .print-choices-section{
+    width:100%;
+    margin-top:4mm;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+
+  .print-choices-section h2{
+    margin:0 0 2.5mm;
+    padding-bottom:1.8mm;
+    border-bottom:1px solid #dfe4ea;
+    color:#3b4552;
+    font-size:11pt;
+  }
+
+  .print-choices{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:2.5mm;
+  }
+
+  .print-choices.three{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .print-choice-group{
+    overflow:hidden;
+    border:1px solid #dfe4ea;
+    border-radius:2.5mm;
+    background:#fff;
+  }
+
+  .print-choice-title{
+    padding:2mm 2.3mm;
+    background:#f5f6f8;
+    color:#4b5563;
+    border-bottom:1px solid #e2e6eb;
+    font-size:8.5pt;
+    font-weight:900;
+  }
+
+  .print-choice-options{
+    display:grid;
+  }
+
+  .print-choice-option{
+    display:flex;
+    align-items:center;
+    gap:1.5mm;
+    min-height:6.2mm;
+    padding:1.2mm 2.1mm;
+    border-bottom:1px solid #edf0f3;
+    color:#46505d;
+    font-size:7.8pt;
+    font-weight:700;
+  }
+
+  .print-choice-option:last-child{
+    border-bottom:0;
+  }
+
+  .print-choice-option.selected{
+    color:#246446;
+    background:#f4fbf6;
+    font-weight:900;
+  }
+
+  .print-choice-box{
+    flex:0 0 auto;
+    width:3.5mm;
+    text-align:center;
+    font-size:9pt;
+  }
+
+  .print-footer{
+    display:flex;
+    justify-content:space-between;
+    gap:5mm;
+    margin-top:auto;
+    padding-top:3mm;
+    border-top:1px solid #e2e6eb;
+    color:#9098a3;
+    font-size:7pt;
+  }
+
+  .print-sheet .cell.no{
+    color:#cb5c71 !important;
+    background:#fff8fa !important;
+  }
+
+  .print-sheet .cell.yes{
+    color:#13865a !important;
+    background:#f5fff9 !important;
+  }
+}

@@ -1246,13 +1246,34 @@ select:focus{
   flex-basis:100%;
 }
 
-.install-action{
-  display:block;
-  flex-basis:100%;
+.install-card{
+  display:grid;
+  gap:6px;
+  margin:0 0 14px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--surface-soft);
 }
-.install-action.available{display:block}
+.install-action{
+  width:100%;
+  min-height:40px;
+}
+.install-hint{
+  color:var(--muted);
+  font-size:10.5px;
+  line-height:1.35;
+  font-weight:700;
+}
+.install-card.ready{
+  border-color:#cfd9d3;
+  background:#f5faf7;
+}
+.install-card.ready .install-hint{
+  color:#4f765f;
+}
 @media(display-mode:standalone){
-  .install-action{display:none !important}
+  .install-card{display:none !important}
 }
 
 .print-sheet{
@@ -1503,6 +1524,11 @@ select:focus{
         <button class="app-tab" data-screen="saved" type="button">📁 Casos</button>
       </nav>
 
+      <div class="install-card" id="installCard">
+        <button class="action install-action" id="installApp" type="button">⬇ Instalar aplicativo</button>
+        <div class="install-hint" id="installHint">Instale o Quadro de Dedução para abrir como um aplicativo no celular.</div>
+      </div>
+
       <div class="resolver-controls">
         <div class="note" id="levelNote">Quadro de dedução</div>
 
@@ -1548,7 +1574,6 @@ select:focus{
         <button class="action" id="newCase" type="button">Novo</button>
         <button class="action warn" id="clearCase" type="button">Limpar</button>
         <button class="action print-action" id="printCase" type="button">🖨 Imprimir / PDF</button>
-        <button class="action install-action" id="installApp" type="button">⬇ Instalar aplicativo</button>
       </div>
 
       <div class="save-status" id="saveStatus" aria-live="polite"></div>
@@ -1689,7 +1714,9 @@ const els={
   newCase:document.getElementById("newCase"),
   clearCase:document.getElementById("clearCase"),
   printCase:document.getElementById("printCase"),
+  installCard:document.getElementById("installCard"),
   installApp:document.getElementById("installApp"),
+  installHint:document.getElementById("installHint"),
   saveStatus:document.getElementById("saveStatus"),
   editor:document.getElementById("editor"),
   board:document.getElementById("board"),
@@ -2957,46 +2984,109 @@ window.addEventListener("afterprint",cleanupPrintSheet);
 window.addEventListener("beforeunload",persistNow);
 
 /* Instalação como aplicativo (PWA) */
+function isStandaloneMode(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+}
+
+function setInstallHint(message,ready=false){
+  if(els.installHint) els.installHint.textContent=message;
+  if(els.installCard) els.installCard.classList.toggle("ready",ready);
+}
+
+function refreshInstallUI(){
+  if(!els.installCard) return;
+
+  if(isStandaloneMode()){
+    els.installCard.style.display="none";
+    return;
+  }
+
+  els.installCard.style.removeProperty("display");
+
+  if(deferredInstallPrompt){
+    setInstallHint("Pronto para instalar. Toque no botão acima.",true);
+    return;
+  }
+
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  const isAndroid=/android/i.test(navigator.userAgent);
+
+  if(isIOS){
+    setInstallHint("No iPhone/iPad: Compartilhar → Adicionar à Tela de Início.");
+  }else if(isAndroid){
+    setInstallHint("No Android, toque no botão acima. Se o navegador não abrir a instalação, use ⋮ → Adicionar à tela inicial / Instalar app.");
+  }else{
+    setInstallHint("Toque no botão acima ou use a opção de instalar/adicionar à tela inicial do navegador.");
+  }
+}
+
 window.addEventListener("beforeinstallprompt",event=>{
   event.preventDefault();
   deferredInstallPrompt=event;
-  els.installApp?.classList.add("available");
+  refreshInstallUI();
 });
 
 els.installApp?.addEventListener("click",async()=>{
+  if(isStandaloneMode()){
+    setInstallHint("O aplicativo já está aberto no modo instalado.",true);
+    return;
+  }
+
   if(deferredInstallPrompt){
     deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
+    const choice=await deferredInstallPrompt.userChoice;
+    if(choice?.outcome==="accepted"){
+      setInstallHint("Instalação confirmada.",true);
+    }else{
+      setInstallHint("Instalação cancelada. Você pode tentar novamente pelo menu do navegador.");
+    }
     deferredInstallPrompt=null;
     return;
   }
 
-  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
   const isAndroid=/android/i.test(navigator.userAgent);
 
   if(isIOS){
-    alert("Para instalar no iPhone/iPad: toque no botão Compartilhar do navegador e escolha ‘Adicionar à Tela de Início’. Depois confirme em ‘Adicionar’. ");
+    setInstallHint("Toque em Compartilhar e escolha “Adicionar à Tela de Início”.");
+    alert("No iPhone/iPad: toque em Compartilhar e escolha “Adicionar à Tela de Início”. Depois confirme em “Adicionar”.");
     return;
   }
 
   if(isAndroid){
-    alert("Se a janela de instalação não apareceu, abra o menu ⋮ do navegador e escolha ‘Instalar app’ ou ‘Adicionar à tela inicial’. Se acabou de abrir o site pela primeira vez, atualize a página uma vez e tente novamente.");
+    setInstallHint("Abra o menu ⋮ do navegador e escolha “Adicionar à tela inicial” ou “Instalar app”.");
+    alert("O navegador ainda não liberou a janela automática. No Chrome, abra ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”.");
     return;
   }
 
-  alert("Abra o menu do navegador e procure por ‘Instalar app’, ‘Adicionar à tela inicial’ ou opção equivalente.");
+  setInstallHint("Use a opção “Instalar app” ou “Adicionar à tela inicial” no menu do navegador.");
 });
 
 window.addEventListener("appinstalled",()=>{
   deferredInstallPrompt=null;
-  els.installApp?.classList.remove("available");
+  setInstallHint("Aplicativo instalado.",true);
+  setTimeout(refreshInstallUI,300);
   flash("Aplicativo instalado.");
 });
 
+window.matchMedia("(display-mode: standalone)").addEventListener?.("change",refreshInstallUI);
+
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./sw.js").catch(error=>console.warn("Service Worker:",error));
+  window.addEventListener("load",async()=>{
+    try{
+      const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
+      registration.update().catch(()=>{});
+    }catch(error){
+      console.warn("Service Worker:",error);
+      setInstallHint("Não foi possível ativar o modo offline. Atualize a página e tente novamente.");
+    }
+    refreshInstallUI();
   });
+}else{
+  refreshInstallUI();
 }
 
 /* Inicialização */
@@ -3015,6 +3105,7 @@ syncMenuArrow();
 syncChoicePanel();
 updateUndoButton();
 setScreen(currentScreen);
+refreshInstallUI();
 persistNow();
 </script>
 </body>

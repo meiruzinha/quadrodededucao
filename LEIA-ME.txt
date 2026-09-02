@@ -1,0 +1,10 @@
+QUADRO DE DEDUÇÃO — V73 PWA
+
+Cloudflare Pages:
+1. Faça um novo deploy com TODO o conteúdo desta pasta.
+2. Confirme que index.html, manifest.webmanifest, sw.js e a pasta icons ficam na raiz do site.
+3. No celular, abra https://quadrodededucao.pages.dev/ no Chrome.
+4. A opção "⬇ Instalar aplicativo" agora fica sempre visível no menu, inclusive na tela Casos.
+5. Se o Chrome ainda não liberar a janela automática, use ⋮ > Adicionar à tela inicial / Instalar app.
+
+A V73 também usa atualização de navegação pela rede para evitar que versões antigas fiquem presas no cache.
